@@ -1,0 +1,58 @@
+{% load widget_tweaks %}
+{% if title %}
+<title>Managment - Register</title>
+{% endif %}
+
+<form id="form-container" class="grid gap-3 mx-auto w-full p-3 max-w-sm bg-slate-500 rounded-lg text-white" 
+    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    hx-post="{% url 'account:register_view' %}"
+    action="{% url 'account:register_view' %}" method="post">
+
+    {% csrf_token %}
+    <h1 class="text-center text-4xl font-semibold ">Register Form</h1>
+
+    <div>
+        <label class="block text-xl" for="{{ form.email.id_for_label }}">Email:</label>
+        {% for error in form.email.errors %}
+            <p class="text-red-200">{{ error }}</p>
+        {% endfor %}
+        {% render_field form.email class="w-full bg-gray-400 border-2 border-black rounded py-1 px-2 text-black" %}
+    </div>
+
+    <div>
+        <label class="block text-xl" for="{{ form.username.id_for_label }}">Username:</label>
+        {% for error in form.username.errors %}
+            <p class="text-red-200">{{ error }}</p>
+        {% endfor %}
+        {% render_field form.username class="w-full bg-gray-400 border-2 border-black rounded py-1 px-2 text-black" %}
+    </div>
+    
+    <div>
+        <label class="block text-xl" for="{{ form.password.id_for_label }}">Password:</label>
+        {% for error in form.password.errors %}
+            <p class="text-red-200">{{ error }}</p>
+        {% endfor %}
+        {% render_field form.password class="w-full bg-gray-400 border-2 border-black rounded py-1 px-2 text-black" %}
+    </div>
+
+    {% for error in form.non_field_errors %}
+    <p class="text-red-200">{{ error }}</p>
+    {% endfor %}
+
+    
+
+    <div class="w-full text-center">
+        <button class="py-2 px-3 mb-5 bg-blue-600 hover:bg-blue-800 rounded border border-black">Register</button>
+
+        <p>
+            Already have an account? Great! 
+        </p>
+        <p>
+            <a class="text-yellow-400 font-semibold border-b border-yellow-400" 
+            hx-get="{% url 'account:login_view' %}" 
+            hx-target="#main"
+            hx-push-url="true"
+            href="{% url 'account:login_view' %}">You can log in here!</a> 
+        </p>
+    </div>
+</form>

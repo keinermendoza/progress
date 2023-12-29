@@ -1,0 +1,139 @@
+{% extends 'progress/base.html' %}
+{% load static %}
+{% block title %}{{project.name | capfirst}}{% endblock title %}
+
+{% block main %}
+<div class="grid -mt-6">
+
+<figure class=" bg-gray-500 mx-auto w-full">
+    {% if project.image %}
+        <img class="w-full max-w-4xl mx-auto" src="{{project.image.url}}" alt="{{project.name}}">
+    {% else %}
+        <img class="w-full max-w-lg mx-auto" src="{% static 'progress/img/notImageProvided.png'  %}" alt="{{project.name}}">
+    {% endif %}
+</figure>    
+
+{% with project.project_notes.count as note_count %}
+<!-- main project section -->
+<section x-data="{Modalvisible:false, noteCount: {{note_count}}, editing:false}"
+        class="my-5">
+
+    <h1 class="text-4xl text-center mt-2">{{project.name}}</h1>
+    <div class="my-2">
+        <p>{{project.description}}</p>
+        <p class="italic text-sm">Actual State: {{project.get_status_display}}</p>
+        <p class="italic text-sm">Project Created on {{project.created}}</p>
+    </div>
+
+    {% if project.url %}
+    <a href="{{project.url}}" target="_blank" class="my-3 text-white inline-block bg-blue-700 hover:bg-blue-800 rounded-lg px-3 py-1.5">See Online</a>
+    {% endif %}
+    
+    <div class="bg-gray-400 flex justify-between rounded-lg p-2 w-full">
+        
+        <div class="grid place-content-center">
+            
+            <div class="relative">
+                <svg class="absolute top-1" xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512">
+                    <path d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H288V352c0-17.7 14.3-32 32-32h80V96c0-8.8-7.2-16-16-16H64zM288 480H64c-35.3 0-64-28.7-64-64V96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V320v5.5c0 17-6.7 33.3-18.7 45.3l-90.5 90.5c-12 12-28.3 18.7-45.3 18.7H288z"/>
+                </svg>
+                <span class="inline-block ms-5" x-text="noteCount">{{note_count}}</span> 
+                <span class="inline-block" x-text="noteCount == 1 ? 'note' : 'notes' "> note{{note_count | pluralize}}</span>
+            </div>
+            
+        </div>
+
+        <!-- Modal toggle -->
+        <button @click="Modalvisible = true"
+                data-modal-target="default-modal" data-modal-toggle="default-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+            Project Notes
+        </button>
+        
+    </div>
+
+    {% include "progress/snippets/notelist_modal.html" with object_notes_all=project.project_notes.all note_count=note_count object=project project_notes=True %}
+
+
+</section>
+{% endwith %}
+
+    <section>
+        {% with task_count=project.tasks.count %}
+        <h2 class="text-2xl">Task{{task_count | pluralize}}</h2>
+        <p class="text-sm">This project has {{task_count}} task{{task_count| pluralize}}</p>
+        {% endwith %}
+        
+
+        {% for task in project.tasks.all %}
+
+        {% with note_count=task.task_notes.count %}
+        <article x-data="{Modalvisible:false, noteCount: {{note_count}}, editing:false}"
+                class="my-2 bg-gray-300 border-solid border-gray-900 border-2 rounded ">
+            <!-- title task -->
+            <header class="p-3 flex gap-3 justify-between bg-gray-400">
+                <span class="grid place-content-center text-xl">{{task.name}}</span>
+                <span class="p-1 shadow rounded bg-gray-100 grid place-self-start text-[0.7em] text-center">{{task.get_status_display}}</span>
+            </header>
+
+            <main class="px-3">
+                <p class="my-3">{{task.description}}</p>
+
+                <div class="my-3 text-sm">
+                    <p class="">Importance: {{task.get_importance_display}}</p>
+                    
+                    {% with estimated=task.estimated_time %}
+                    <p class="">Estimated Time: {{estimated}} {{task.get_esitmated_unit_time_display}}{{estimated|pluralize}}</p>
+                    {% endwith %}
+
+                {% if  task.started and not task.completed %}
+                    <p class="italic ">Task started on {{task.started}}</p>
+                    <p class="mt-1 font-semibold">Estimated Delivery <br>{{task.get_time_to_finish}}</p>
+                
+                {% elif task.started and task.completed %}
+                    <p class="italic">Task Completed on {{task.completed}}</p>
+
+                {% endif %}
+                </div>
+            </main>
+
+            
+            <footer class="px-3 py-1 text-sm flex gap-3 justify-between bg-gray-400">
+                <div class="grid place-content-center">
+                    
+                    <div class="relative">
+                        <svg class="absolute top-[0.125em]" xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512">
+                            <path d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H288V352c0-17.7 14.3-32 32-32h80V96c0-8.8-7.2-16-16-16H64zM288 480H64c-35.3 0-64-28.7-64-64V96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V320v5.5c0 17-6.7 33.3-18.7 45.3l-90.5 90.5c-12 12-28.3 18.7-45.3 18.7H288z"/>
+                        </svg>
+                        <span class="inline-block ms-5" x-text="noteCount">{{note_count}}</span> 
+                        <span class="inline-block" x-text="noteCount == 1 ? 'note' : 'notes' "> note{{note_count | pluralize}}</span>
+                    </div>
+                </div>
+
+                <!-- Modal toggle -->
+                <button @click="Modalvisible = true"
+                    data-modal-target="default-modal" data-modal-toggle="default-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+                    Show Notes
+                </button>
+                            
+            </footer>
+            
+            {% include "progress/snippets/notelist_modal.html" with object_notes_all=task.task_notes.all note_count=note_count  object=task %}
+
+            
+        {% endwith %}
+            
+        </article>
+        {% endfor %}
+    </section>
+
+</div>
+
+
+<!-- reference to scroll modal -->
+<!-- https://flowbite.com/docs/components/modal/ -->
+<!-- https://stackoverflow.com/questions/66839202/make-tailwindcss-modal-dialog-with-scrolling-content -->
+
+
+
+{% endblock main %}
+    

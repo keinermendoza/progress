@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.d-none {
+    display:none;
+}
+
+@layer components {
+    .grid-col-350 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    }
+}
+
+
+@layer utilities {
+
+    .modale-list-cover {
+        @apply  after:content-['EDITING']
+                after:absolute 
+                after:w-full 
+                after:h-full 
+                after:inset-0 
+                after:bg-slate-500 
+                after:text-white 
+                after:bg-opacity-70
+                after:text-5xl 
+                after:font-semibold 
+                after:grid 
+                after:place-content-center
+    }
+}

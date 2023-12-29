@@ -1,0 +1,159 @@
+{% comment %} 
+<!-- IMPORTANT NOTES -->
+<!-- this modal snippets is been used for both project notes and task notes  -->
+<!-- so variables here refers to local variables were the snippet is call -->
+<!-- Modalvisible is an alpine local variable that it's define in project_detail -->
+{% endcomment %}
+
+<!-- Main modal -->
+<div  x-show="Modalvisible"
+    id="default-modal" tabinde
+    x="-1" aria-hidden="true" 
+    class="bg-gray-600 bg-opacity-50 overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 flex justify-center items-center w-full md:inset-0 h-full max-h-full">
+    
+    {% comment %} 
+    I remove it because now I'm using a confirmation Delete modal wich is interfering with this
+    @click.outside="Modalvisible = false"
+    {% endcomment %}
+    <div 
+        class="relative p-4 w-full max-w-2xl max-h-full">
+
+        <!-- Modal content -->
+
+        <div class="relative mx-auto flex flex-col  max-h-[calc(100vh-2rem)]   overflow-y-auto     bg-white rounded-lg shadow dark:bg-gray-700">
+
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="place-self-center text-lg text-gray-900 dark:text-white">
+                    Notes of {% if project_notes %}Project{% else %}Task{% endif %}<br>
+                    <span class="font-semibold text-xl">{{object.name}}</span> 
+                </h3>
+                
+    
+                <!-- close button-->
+                <button @click="Modalvisible = false, editing = false"
+                    type="button" class="text-gray-200 bg-red-500 hover:bg-red-700 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="default-modal">
+                
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+
+           
+
+            <!-- Modal body --> 
+            {% comment %} 
+                i use the next id's for the hx-target
+                for insert partials of progress/snippets/notelist.html
+                when creating, updating and deleting TaskNotes and ProjectNotes
+            {% endcomment %}
+            
+            <div class="target-note-list flex-auto overflow-y-auto relative p-4"
+                :class="editing ? 'modale-list-cover' : '' "
+            {% if project_notes %}
+                id="project_notes_list"
+            {% else %}
+                id="task_notes_list_{{object.id}}" 
+            {% endif %}   
+            >
+                
+                {% if project_notes %}
+                    {% include "progress/snippets/project_note_list.html" with object_notes_all=object_notes_all %}
+                {% else %}
+                    {% include "progress/snippets/task_note_list.html" with object_notes_all=object_notes_all %}
+                {% endif %}
+
+            </div>
+
+
+            <!-- Modal footer -->
+            <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                
+                {% if user.is_authenticated %}
+                <!-- CREATE NOTE -->
+                <form x-show="editing == false"
+                    @upp-note-counter="++noteCount"
+
+                    class="form-notes w-full" method="post"
+                    {% if project_notes %}
+                        hx-target="#project_notes_list"
+                        action="{% url 'progress:create_project_note' object.id %}"
+                        hx-post="{% url 'progress:create_project_note' object.id %}"
+                    {% else %}
+                        hx-target="#task_notes_list_{{object.id}}"
+                        action="{% url 'progress:create_task_note' object.id %}"
+                        hx-post="{% url 'progress:create_task_note' object.id %}"
+                    {% endif %}
+                        hx-swap="beforeend"
+                        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+
+                        
+                    >
+                    <div class="flex justify-end gap-2 py-1">
+                        <span class="p-1 rounded text-[0.7em] bg-yellow-400">New Note</span> 
+                    </div>
+
+                    {% csrf_token %}
+                    <textarea class="w-full mb-2 p-2 rounded-lg border-solid border-2 border-b-gray-200" name="note" placeholder="Add a Note" id="" cols="" rows="3"></textarea>
+                    <button type="submit" class="float-right text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    >Create Note</button>
+                </form>
+
+                <!-- EDIT NOTE -->
+                <!-- the differences are the htmx method "PUT" and
+                    the precense of an aditional input "noteId" -->
+                <form x-show="editing"
+                    @set-editing-false="editing = false" 
+                    
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+
+
+                    {% if project_notes %}
+                        hx-target="#project_notes_list"
+                        action="{% url 'progress:create_project_note' object.id %}"
+                        hx-put="{% url 'progress:create_project_note' object.id %}"
+                    {% else %}
+                        hx-target="#task_notes_list_{{object.id}}"
+                        action="{% url 'progress:create_task_note' object.id %}"
+                        hx-put="{% url 'progress:create_task_note' object.id %}"
+                    {% endif %}
+
+
+                    class="form-edit-notes w-full relative">
+                    <div class="flex justify-end gap-2 py-1">
+                        <span @click="editing = false" 
+                            class="p-1 rounded text-[0.7em] text-white bg-blue-500 cursor-pointer hover:bg-blue-700">Change to New Note</span>
+                        <span class="p-1 rounded text-[0.7em] bg-yellow-400">Editing</span> 
+                    </div>
+                    <input type="hidden" name="noteId">
+                    <textarea 
+                        class="w-full mb-2 p-2 rounded-lg border-solid border-2 border-b-gray-200" name="note" placeholder="Add a Note" id="" cols="" rows="3"></textarea>
+                    <button type="submit" class="float-right text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    >Save Note</button>
+                </form>
+
+                {% else %}
+
+                <div class="w-full flex content-center flex-col  sm:flex-row gap-2 justify-between">
+                    <p class="place-self-center">You need to be logged for interact</p>
+
+                    <!-- LOGIN BTN -->
+                    <a hx-get="{% url 'account:login_view' %}" 
+                    hx-target="#main"
+                    hx-push-url="true"
+                    href="{% url 'account:login_view' %}" 
+                    class="place-self-center inline-block p-2 rounded bg-sky-400 hover:bg-sky-500">Login</a>
+            
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+    </div>
+</div>

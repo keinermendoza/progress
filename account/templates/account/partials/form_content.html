@@ -1,0 +1,11 @@
+{% load widget_tweaks %}
+
+<div>
+    <label class="block text-xl" for="{{ form.email.id_for_label }}">Email:</label>
+    {% render_field form.email class="w-full bg-gray-400 border-2 border-black rounded py-1 px-2 text-black" %}
+</div>
+
+<div>
+    <label class="block text-xl" for="{{ form.password.id_for_label }}">Password:</label>
+    {% render_field form.password class="w-full bg-gray-400 border-2 border-black rounded py-1 px-2 text-black" %}
+</div>

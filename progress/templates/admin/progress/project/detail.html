@@ -1,0 +1,133 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}
+Project {{ project.id }} {{ block.super }}
+{% endblock %}
+
+
+{% block extrastyle %}<link rel="stylesheet" href="{% static 'tailwind/tail.css' %}">{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url "admin:index" %}">Home</a> &rsaquo;
+    <a href="{% url "admin:progress_project_changelist" %}">Projects</a>
+    &rsaquo;
+    <a href="{% url "admin:progress_project_change" project.id %}">Project {{ project.name}}</a>
+    &rsaquo; Detail
+</div>
+{% endblock %}
+
+{% block content %}
+
+<div class="module">
+    <!-- INFO PROJECT -->
+    <h1 class="text-2xl font-bold text-black ">{{ project.name }}</h1>
+    <p class="mb-3">{{project.description}}</p>
+    
+    <table>
+        <tr>
+            <th>Created</th>
+            <td>{{ project.created }}</td>
+        </tr>
+        <tr>
+            <th>Updated</th>
+            <td>{{ project.updated }}</td>
+        </tr>
+        <tr>
+            <th>Importance</th>
+            <td>{{ project.get_importance_display }}</td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td>{{ project.get_status_display }}</td>
+        </tr>
+        
+    </table>
+
+    <!-- PROJECT COMMENTS -->
+    {% with project_notes=project.project_notes.count %}
+        {% if project_notes > 0 %}
+            <p class="mt-5 text-lg font-semibold">Your project has {{project_notes}} note{{project_notes | pluralize}}</p>
+            
+            {% for note in project.project_notes.all %}
+            <div class="bg-slate-300 p-2 my-2 rounded">
+                <p> 
+                    <span class="font-semibold">Note {{ forloop.counter }}:</span>
+                    By<span class="font-semibold"> {{ note.user.username | capfirst }}</span>     
+                </p>
+                <p class="italic">{{note.created}}</p>
+                <p>
+                    {{note.message}}
+                </p>
+
+                {% if note.was_updated %}
+                    <p class="italic">Updated last time {{note.updated}}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+</div>
+
+<!-- tasks of the project -->
+<div class="module">
+    <h2>Tasks related to the Project</h2>
+    <table class="w-full">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Updated</th>
+                <th class="w-36">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in project.tasks.all %}
+            <tr >
+                <td>{{ task.name }}</td>
+                <td>{{ task.description }}</td>
+
+                <td class="num">{{ task.get_status_display }}</td>
+                <td class="num">{{ task.created }}</td>
+                <td class="num">{{ task.updated }}</td>
+                <td class="w-36">
+                    <a class="p-1 ms-auto bg-green-200 hover:bg-green-300 rounded" href="{% url 'admin:progress_task_change' task.id %}">Edit Task / Notes</a>
+                </td>
+
+            </tr>
+
+                <!-- comments of the task -->
+                {% if task.task_notes.exists %}
+                    {% for comment in task.task_notes.all %}
+                    <tr >
+                        <td colspan="6" class="bg-yellow-200">
+                            <span class="text-sm mr-2">#{{ forloop.counter }} Msg:</span>
+                            {% if comment.user == request.user %}
+                            
+                            <span class="text-sm mr-2 font-semibold p-1 text-white bg-sky-700 rounded">Me</span>
+                            {% else %}
+                            <span class="text-sm mr-2 font-semibold p-1 bg-slate-400 rounded">{{ comment.user.username }}</span>
+                            {% endif %}
+
+                            <span class="mr-2 italic">{{ comment.created |date:"d/M/Y g:iA"}}.</span>
+                            <span class="mr-2">{{ comment.message }}</span> 
+                                
+                            
+                                
+                        </td>
+                    </tr>                        
+                    {% endfor %}
+                {% endif %}
+            
+
+            {% endfor %}
+
+
+        </tbody>
+    </table>
+</div> 
+{% endblock %}
