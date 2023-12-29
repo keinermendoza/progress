@@ -1,11 +1,11 @@
-# Progress Managment
+# Progress
 This is a management tool, focused on communicating project progress and receiving feedback.
+
+See this project [online in pythonanywhere](https://keinermendoza.pythonanywhere.com)
 
 ![this project](https://github.com/keinermendoza/project-managment/assets/75821986/651f1986-0107-49b3-b2bd-f027b0e1851f)
 
 ## Get Started
-
-If you already know how to test a Django project just skip this part.
 
 Create a virtual enviorment
 ```
@@ -17,7 +17,7 @@ Activate the virtual enviorment
 source venv/bin/activate
 ```
 
-go into the folder project
+go into the project folder
 
 ```
 cd progress
@@ -29,9 +29,10 @@ Install the denpendencies
 pip install -r requirements.txt
 ```
 
-run migrations
+create migrations
 ```
-python3 manage.py makemigrations
+python3 manage.py makemigrations progress
+python3 manage.py makemigrations account
 ```
 
 apply migrations
